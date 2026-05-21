@@ -1,0 +1,10 @@
+spring-artisan:
+  package-base: com.example.app
+  author: Spring Artisan
+  api-prefix: /api/v1
+  output-dir: src/main/java
+  test-output-dir: src/test/java
+  generators:
+    include-lombok: true
+    include-validation: true
+    test-framework: junit5

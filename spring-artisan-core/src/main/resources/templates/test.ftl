@@ -1,0 +1,106 @@
+package ${testPackage};
+
+import ${packageName}.model.${entityName};
+import ${packageName}.repository.${repositoryName};
+import ${packageName}.service.${serviceName};
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@DisplayName("${serviceName} Tests")
+class ${serviceName}Test {
+    
+    private ${serviceName} service;
+    
+    @Mock
+    private ${repositoryName} repository;
+    
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        service = new ${serviceName}(repository);
+    }
+    
+    @Test
+    @DisplayName("Should find all ${entityNameLower}s")
+    void testFindAll() {
+        // Arrange
+        when(repository.findAll()).thenReturn(java.util.Collections.emptyList());
+        
+        // Act
+        var result = service.findAll();
+        
+        // Assert
+        assertThat(result).isEmpty();
+        verify(repository, times(1)).findAll();
+    }
+    
+    @Test
+    @DisplayName("Should find ${entityNameLower} by ID")
+    void testFindById() {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        ${entityName} entity = new ${entityName}();
+        entity.setId(id);
+        when(repository.findById(id)).thenReturn(Optional.of(entity));
+        
+        // Act
+        var result = service.findById(id);
+        
+        // Assert
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(id);
+        verify(repository, times(1)).findById(id);
+    }
+    
+    @Test
+    @DisplayName("Should save ${entityNameLower}")
+    void testSave() {
+        // Arrange
+        ${entityName} entity = new ${entityName}();
+        when(repository.save(entity)).thenReturn(entity);
+        
+        // Act
+        var result = service.save(entity);
+        
+        // Assert
+        assertThat(result).isNotNull();
+        verify(repository, times(1)).save(entity);
+    }
+    
+    @Test
+    @DisplayName("Should delete ${entityNameLower} by ID")
+    void testDeleteById() {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        
+        // Act
+        service.deleteById(id);
+        
+        // Assert
+        verify(repository, times(1)).deleteById(id);
+    }
+    
+    @Test
+    @DisplayName("Should check if ${entityNameLower} exists")
+    void testExistsById() {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        when(repository.existsById(id)).thenReturn(true);
+        
+        // Act
+        var result = service.existsById(id);
+        
+        // Assert
+        assertThat(result).isTrue();
+        verify(repository, times(1)).existsById(id);
+    }
+}

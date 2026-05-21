@@ -1,0 +1,57 @@
+package ${packageName};
+
+import javax.persistence.*;
+<#if useLombok>
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+</#if>
+<#list imports as import>
+${import}
+</#list>
+
+<#if useLombok>
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+</#if>
+@Entity
+@Table(name = "${tableName}")
+public class ${entityName} {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    private java.util.UUID id;
+<#list fields as field>
+    <#if field.name != "id">
+    
+    <#if addValidation && field.type.name() == "STRING">
+    @Column(name = "${field.name}"<#if field.unique>, unique = true</#if><#if !field.nullable>, nullable = false</#if>)
+    @NotBlank(message = "${field.name} cannot be blank")
+    <#else>
+    @Column(name = "${field.name}"<#if field.unique>, unique = true</#if><#if !field.nullable>, nullable = false</#if>)
+    </#if>
+    private ${field.javaType} ${field.name};
+    </#if>
+</#list>
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private java.time.LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private java.time.LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = java.time.LocalDateTime.now();
+        updatedAt = java.time.LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = java.time.LocalDateTime.now();
+    }
+}

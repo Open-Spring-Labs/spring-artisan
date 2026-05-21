@@ -1,0 +1,33 @@
+spring-artisan:
+  # Base package for all generated classes
+  # Example: com.example.app
+  package-base: com.artisan.app
+
+  # Author name that will appear in generated code comments
+  author: MAWULI AGBENYO
+
+  # API prefix for REST controller endpoints
+  # Example: /api/v1, /api/v2
+  api-prefix: /api/v1
+
+  # Output directory for generated main classes
+  # Relative to project root
+  output-dir: src/main/java
+
+  # Generator-specific settings
+  generators:
+    # Include Lombok annotations (@Data, @NoArgsConstructor, @AllArgsConstructor, @Builder)
+    include-lombok: true
+
+    # Include Jakarta Validation annotations (@NotNull, @Email, @Size, etc)
+    include-validation: true
+
+    # Test framework to use (junit5 or testng)
+    test-framework: junit5
+
+  # Template configuration
+  templates:
+    # Path to custom templates directory
+    # Leave as null to use built-in templates
+    # Example: custom-templates/
+    custom-dir: null

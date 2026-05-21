@@ -1,0 +1,73 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+.flattened-pom.xml
+build.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Java
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+.mtj.tmp/
+*.jks
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Generated files
+.generated/
+generated-sources/
+
+# Test reports
+test-results/
+coverage/
+*.exec
+
+# Misc
+*.orig
+.env
+.env.local
+
+
+# Notes
+DELIVERY_SUMMARY.txt
+IMPLEMENTATION_SUMMARY.md
+INDEX.md
+PROJECT_STRUCTURE.md
+QUICKSTART.md

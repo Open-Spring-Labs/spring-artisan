@@ -1,0 +1,29 @@
+package ${dtoPackage};
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+/**
+ * Data Transfer Object for ${entityName}
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ${dtoName} {
+    
+    private UUID id;
+<#list fields as field>
+    <#if field.name != "id">
+    private ${field.javaType} ${field.name};
+    </#if>
+</#list>
+    
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}

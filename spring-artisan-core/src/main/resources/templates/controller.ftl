@@ -1,0 +1,74 @@
+package ${controllerPackage};
+
+import ${packageName}.model.${entityName};
+import ${packageName}.service.${serviceName};
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("${apiPrefix}/${entityNameLower}")
+@RequiredArgsConstructor
+public class ${controllerName} {
+    
+    private final ${serviceName} service;
+
+    /**
+     * Get all ${entityNameLower}s
+     */
+    @GetMapping
+    public ResponseEntity<List<${entityName}>> getAll() {
+        return ResponseEntity.ok(service.findAll());
+    }
+
+    /**
+     * Get ${entityNameLower} by ID
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<${entityName}> getById(@PathVariable UUID id) {
+        return service.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Create new ${entityNameLower}
+     */
+    @PostMapping
+    public ResponseEntity<${entityName}> create(@RequestBody ${entityName} entity) {
+        ${entityName} saved = service.save(entity);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    /**
+     * Update ${entityNameLower}
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<${entityName}> update(
+            @PathVariable UUID id,
+            @RequestBody ${entityName} entity) {
+        
+        return service.findById(id)
+                .map(existing -> {
+                    entity.setId(id);
+                    return ResponseEntity.ok(service.save(entity));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Delete ${entityNameLower}
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        if (service.existsById(id)) {
+            service.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+}
