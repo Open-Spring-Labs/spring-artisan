@@ -9,7 +9,7 @@ CREATE TABLE ${tableName} (
     ${field.name?replace("[A-Z]", "_$0", "r")?lower_case} <#if field.type.name() == "STRING">VARCHAR(255)<#elseif field.type.name() == "INTEGER">INTEGER<#elseif field.type.name() == "LONG">BIGINT<#elseif field.type.name() == "DOUBLE">DECIMAL(19,2)<#elseif field.type.name() == "BOOLEAN">BOOLEAN<#elseif field.type.name() == "DATE">DATE<#elseif field.type.name() == "TIMESTAMP">TIMESTAMP<#elseif field.type.name() == "UUID">UUID<#else>VARCHAR(255)</#if><#if !field.nullable> NOT NULL</#if><#if field.unique> UNIQUE</#if>,
 </#if>
 </#list>
-<#list belongsTo as parent>
+<#list belongsTo![] as parent>
     ${parent?lower_case}_id UUID REFERENCES ${parent?lower_case}s(id),
 </#list>
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),

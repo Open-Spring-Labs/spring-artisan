@@ -4,7 +4,7 @@
  */
 package ${repositoryPackage};
 
-import ${packageName}.model.${entityName};
+import ${packageBase}.model.${entityName};
 import org.springframework.data.jpa.repository.JpaRepository;
 <#if paginated>
 import org.springframework.data.domain.Page;
@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Repository
 public interface ${repositoryName} extends JpaRepository<${entityName}, UUID> {
-<#list findByFields as field>
+<#list findByFields![] as field>
     Optional<${entityName}> findBy${field?cap_first}(String ${field});
 </#list>
 <#if paginated>

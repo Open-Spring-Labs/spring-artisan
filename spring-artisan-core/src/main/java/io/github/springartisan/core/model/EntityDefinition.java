@@ -47,6 +47,9 @@ public class EntityDefinition {
         this.packageName = packageName;
         this.fields = new ArrayList<>();
         this.relationships = new ArrayList<>();
+        this.findByFields = new ArrayList<>();
+        this.belongsTo = new ArrayList<>();
+        this.hasMany = new ArrayList<>();
         this.tableName = name.toLowerCase() + "s";
         this.useLombok = true;
         this.addValidation = true;

@@ -85,6 +85,7 @@ public class TemplateEngine {
         model.put("imports", entity.getRequiredImports());
         
         model.put("isKotlin", config.isKotlin());
+        model.put("packageBase", config.getPackageBase());
 
         model.put("servicePackage", config.getServicePackage());
         model.put("controllerPackage", config.getControllerPackage());

@@ -4,9 +4,9 @@
  */
 package ${servicePackage}
 
-import ${packageName}.model.${entityName}
+import ${packageBase}.model.${entityName}
 <#if withRepository>
-import ${packageName}.repository.${repositoryName}
+import ${packageBase}.repository.${repositoryName}
 </#if>
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

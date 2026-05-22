@@ -28,7 +28,7 @@ class ${entityName}(
     var ${field.name}: ${field.kotlinType}? = null,
 </#if>
 </#list>
-<#list belongsTo as parent>
+<#list belongsTo![] as parent>
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "${parent?lower_case}_id")
@@ -41,7 +41,7 @@ class ${entityName}(
     @Column(name = "updated_at")
     var updatedAt: LocalDateTime? = null
 ) {
-<#list hasMany as child>
+<#list hasMany![] as child>
     @OneToMany(mappedBy = "${entityNameLower}", cascade = [CascadeType.ALL], orphanRemoval = true)
     val ${child?lower_case}s: MutableList<${child}> = ArrayList()
 

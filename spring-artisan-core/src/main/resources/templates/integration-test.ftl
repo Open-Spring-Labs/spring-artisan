@@ -4,8 +4,8 @@
  */
 package ${testPackage};
 
-import ${packageName}.model.${entityName};
-import ${packageName}.repository.${repositoryName};
+import ${packageBase}.model.${entityName};
+import ${packageBase}.repository.${repositoryName};
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

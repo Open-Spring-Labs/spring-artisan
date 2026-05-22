@@ -4,9 +4,9 @@
  */
 package ${controllerPackage};
 
-import ${packageName}.model.${entityName};
+import ${packageBase}.model.${entityName};
 <#if withService>
-import ${packageName}.service.${serviceName};
+import ${packageBase}.service.${serviceName};
 import lombok.RequiredArgsConstructor;
 </#if>
 <#if paginated>

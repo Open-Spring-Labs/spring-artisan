@@ -48,13 +48,13 @@ public class ${entityName} {
     private ${field.javaType} ${field.name};
 </#if>
 </#list>
-<#list belongsTo as parent>
+<#list belongsTo![] as parent>
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "${parent?lower_case}_id")
     private ${parent} ${parent?lower_case};
 </#list>
-<#list hasMany as child>
+<#list hasMany![] as child>
 
     @OneToMany(mappedBy = "${entityNameLower}", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
