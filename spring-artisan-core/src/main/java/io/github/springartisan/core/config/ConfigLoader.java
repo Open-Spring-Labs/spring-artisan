@@ -22,9 +22,11 @@ public class ConfigLoader {
         // Try to load from current directory
         File configFile = new File(basePath, CONFIG_FILE);
         if (configFile.exists()) {
+            System.out.println("Loading config from: " + configFile.getAbsolutePath());
             config = loadFromFile(configFile);
         } else {
-            // Load defaults
+            System.out.println("[WARN] No spring-artisan.yml found in " + basePath + ". Using defaults.");
+            System.out.println("[WARN] Create spring-artisan.yml in your project root to set package-base, author, etc.");
             config = loadDefaults();
         }
         
@@ -77,6 +79,9 @@ public class ConfigLoader {
         }
         if (config.containsKey("output-dir")) {
             builder.outputDir((String) config.get("output-dir"));
+        }
+        if (config.containsKey("test-output-dir")) {
+            builder.testOutputDir((String) config.get("test-output-dir"));
         }
         if (config.containsKey("language")) {
             builder.language((String) config.get("language"));
