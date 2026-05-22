@@ -61,6 +61,8 @@ public class TemplateEngine {
         model.put("useLombok", entity.isUseLombok() && config.isIncludeLombok());
         model.put("addValidation", entity.isAddValidation() && config.isIncludeValidation());
         model.put("apiPrefix", config.getApiPrefix());
+        model.put("withService", entity.isWithService());
+        model.put("withRepository", entity.isWithRepository());
         
         // Service and DTO names
         model.put("serviceName", entity.getServiceName());

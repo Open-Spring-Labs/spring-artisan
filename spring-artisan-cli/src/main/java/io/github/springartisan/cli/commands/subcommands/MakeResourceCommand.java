@@ -23,6 +23,8 @@ public class MakeResourceCommand extends BaseGeneratorCommand {
     public Integer call() throws Exception {
         try {
             EntityDefinition entity = createEntityDefinition();
+            entity.setWithService(true);
+            entity.setWithRepository(true);
             
             // Generate all 6 components
             CodeGenerator[] generators = {

@@ -69,7 +69,12 @@ public abstract class BaseGeneratorCommand implements Callable<Integer> {
             }
         }
 
+        configureEntity(entity);
         return entity;
+    }
+
+    protected void configureEntity(EntityDefinition entity) {
+        // subclasses override to set flags like withService, withRepository
     }
 
     protected void writeGeneratedCode(String code, CodeGenerator generator, EntityDefinition entity)

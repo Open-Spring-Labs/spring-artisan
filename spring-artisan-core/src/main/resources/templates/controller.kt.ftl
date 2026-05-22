@@ -5,7 +5,9 @@
 package ${controllerPackage}
 
 import ${packageName}.model.${entityName}
+<#if withService>
 import ${packageName}.service.${serviceName}
+</#if>
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -13,6 +15,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("${apiPrefix}/${entityNameLower}")
+<#if withService>
 class ${controllerName}(private val service: ${serviceName}) {
 
     @GetMapping
@@ -48,3 +51,37 @@ class ${controllerName}(private val service: ${serviceName}) {
             ResponseEntity.notFound().build()
         }
 }
+<#else>
+class ${controllerName} {
+
+    @GetMapping
+    fun getAll(): ResponseEntity<List<${entityName}>> {
+        // TODO: implement
+        return ResponseEntity.ok().build()
+    }
+
+    @GetMapping("/{id}")
+    fun getById(@PathVariable id: UUID): ResponseEntity<${entityName}> {
+        // TODO: implement
+        return ResponseEntity.ok().build()
+    }
+
+    @PostMapping
+    fun create(@RequestBody entity: ${entityName}): ResponseEntity<${entityName}> {
+        // TODO: implement
+        return ResponseEntity.status(HttpStatus.CREATED).build()
+    }
+
+    @PutMapping("/{id}")
+    fun update(@PathVariable id: UUID, @RequestBody entity: ${entityName}): ResponseEntity<${entityName}> {
+        // TODO: implement
+        return ResponseEntity.ok().build()
+    }
+
+    @DeleteMapping("/{id}")
+    fun delete(@PathVariable id: UUID): ResponseEntity<Void> {
+        // TODO: implement
+        return ResponseEntity.noContent().build()
+    }
+}
+</#if>

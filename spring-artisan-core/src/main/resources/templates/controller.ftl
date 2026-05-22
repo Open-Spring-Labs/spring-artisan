@@ -5,8 +5,10 @@
 package ${controllerPackage};
 
 import ${packageName}.model.${entityName};
+<#if withService>
 import ${packageName}.service.${serviceName};
 import lombok.RequiredArgsConstructor;
+</#if>
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,22 +18,19 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("${apiPrefix}/${entityNameLower}")
+<#if withService>
 @RequiredArgsConstructor
+</#if>
 public class ${controllerName} {
-    
+<#if withService>
+
     private final ${serviceName} service;
 
-    /**
-     * Get all ${entityNameLower}s
-     */
     @GetMapping
     public ResponseEntity<List<${entityName}>> getAll() {
         return ResponseEntity.ok(service.findAll());
     }
 
-    /**
-     * Get ${entityNameLower} by ID
-     */
     @GetMapping("/{id}")
     public ResponseEntity<${entityName}> getById(@PathVariable UUID id) {
         return service.findById(id)
@@ -39,23 +38,16 @@ public class ${controllerName} {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Create new ${entityNameLower}
-     */
     @PostMapping
     public ResponseEntity<${entityName}> create(@RequestBody ${entityName} entity) {
         ${entityName} saved = service.save(entity);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    /**
-     * Update ${entityNameLower}
-     */
     @PutMapping("/{id}")
     public ResponseEntity<${entityName}> update(
             @PathVariable UUID id,
             @RequestBody ${entityName} entity) {
-        
         return service.findById(id)
                 .map(existing -> {
                     entity.setId(id);
@@ -64,9 +56,6 @@ public class ${controllerName} {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Delete ${entityNameLower}
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         if (service.existsById(id)) {
@@ -75,4 +64,38 @@ public class ${controllerName} {
         }
         return ResponseEntity.notFound().build();
     }
+<#else>
+
+    @GetMapping
+    public ResponseEntity<List<${entityName}>> getAll() {
+        // TODO: implement
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<${entityName}> getById(@PathVariable UUID id) {
+        // TODO: implement
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping
+    public ResponseEntity<${entityName}> create(@RequestBody ${entityName} entity) {
+        // TODO: implement
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<${entityName}> update(
+            @PathVariable UUID id,
+            @RequestBody ${entityName} entity) {
+        // TODO: implement
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        // TODO: implement
+        return ResponseEntity.noContent().build();
+    }
+</#if>
 }

@@ -21,6 +21,8 @@ public class EntityDefinition {
     private boolean useLombok;
     private boolean addValidation;
     private String tableName;
+    private boolean withService;
+    private boolean withRepository;
 
     @Builder.Default
     private List<EntityField> relationships = new ArrayList<>();

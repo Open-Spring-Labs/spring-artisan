@@ -5,7 +5,9 @@
 package ${servicePackage}
 
 import ${packageName}.model.${entityName}
+<#if withRepository>
 import ${packageName}.repository.${repositoryName}
+</#if>
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.Optional
@@ -13,6 +15,7 @@ import java.util.UUID
 
 @Service
 @Transactional
+<#if withRepository>
 class ${serviceName}(private val repository: ${repositoryName}) {
 
     @Transactional(readOnly = true)
@@ -33,3 +36,31 @@ class ${serviceName}(private val repository: ${repositoryName}) {
     @Transactional(readOnly = true)
     fun count(): Long = repository.count()
 }
+<#else>
+class ${serviceName} {
+
+    fun findAll(): List<${entityName}> {
+        // TODO: implement
+        return emptyList()
+    }
+
+    fun findById(id: UUID): Optional<${entityName}> {
+        // TODO: implement
+        return Optional.empty()
+    }
+
+    fun save(entity: ${entityName}): ${entityName} {
+        // TODO: implement
+        return entity
+    }
+
+    fun deleteById(id: UUID) {
+        // TODO: implement
+    }
+
+    fun existsById(id: UUID): Boolean {
+        // TODO: implement
+        return false
+    }
+}
+</#if>

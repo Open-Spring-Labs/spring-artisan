@@ -21,11 +21,42 @@ New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 $JarUrl = "https://github.com/$Repo/releases/download/v$Version/spring-artisan.jar"
 Invoke-WebRequest -Uri $JarUrl -OutFile "$InstallDir\spring-artisan.jar"
 
-# Create wrapper batch file
-@"
+# Save installed version
+Set-Content "$InstallDir\version" $Version
+
+# Create wrapper batch file with built-in update and version support
+@'
 @echo off
-java -jar "%USERPROFILE%\.spring-artisan\spring-artisan.jar" %*
-"@ | Set-Content "$InstallDir\spring-artisan.bat"
+set INSTALL_DIR=%USERPROFILE%\.spring-artisan
+set REPO=Open-Spring-Labs/spring-artisan
+
+if "%1"=="update" (
+    echo Checking for updates...
+    for /f "delims=" %%i in ('powershell -Command "(Invoke-RestMethod https://api.github.com/repos/%REPO%/releases/latest).tag_name -replace '^v', ''"') do set LATEST=%%i
+    set /p CURRENT=<%INSTALL_DIR%\version
+    if "%LATEST%"=="%CURRENT%" (
+        echo Already on the latest version ^(v%CURRENT%^).
+    ) else (
+        echo Updating from v%CURRENT% to v%LATEST%...
+        powershell -Command "Invoke-WebRequest -Uri https://github.com/%REPO%/releases/download/v%LATEST%/spring-artisan.jar -OutFile '%INSTALL_DIR%\spring-artisan.jar'"
+        echo %LATEST%>%INSTALL_DIR%\version
+        echo Updated to v%LATEST% successfully!
+    )
+    goto :eof
+)
+
+if "%1"=="--version" goto :version
+if "%1"=="-v" goto :version
+goto :run
+
+:version
+set /p VER=<%INSTALL_DIR%\version
+echo Spring Artisan v%VER%
+goto :eof
+
+:run
+java -jar "%INSTALL_DIR%\spring-artisan.jar" %*
+'@ | Set-Content "$InstallDir\spring-artisan.bat"
 
 # Add to user PATH if not already there
 $CurrentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
@@ -37,4 +68,8 @@ if ($CurrentPath -notlike "*$InstallDir*") {
 
 Write-Host ""
 Write-Host "Spring Artisan v$Version installed successfully!"
-Write-Host "Run: spring-artisan make model User"
+Write-Host ""
+Write-Host "Commands:"
+Write-Host "  spring-artisan make model User     generate code"
+Write-Host "  spring-artisan --version           show current version"
+Write-Host "  spring-artisan update              update to latest version"
