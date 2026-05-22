@@ -18,7 +18,8 @@ import picocli.CommandLine;
         MakeExceptionHandlerCommand.class,
         MakeEntityCommand.class,
         MakeAllCommand.class,
-        MakeResourceCommand.class
+        MakeResourceCommand.class,
+        MakeAuthCommand.class
     },
     mixinStandardHelpOptions = true
 )
@@ -38,6 +39,7 @@ public class MakeCommand implements Runnable {
         System.out.println("  spring-artisan make entity <name>             All layers from entities/<Name>.yml");
         System.out.println("  spring-artisan make all                       All layers for every entities/*.yml");
         System.out.println("  spring-artisan make resource <name>           All 6 layers in one command");
+        System.out.println("  spring-artisan make auth                      JWT auth scaffold (9 files)");
         System.out.println("\nUse 'spring-artisan make <command> --help' for options");
     }
 }

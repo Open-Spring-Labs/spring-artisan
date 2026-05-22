@@ -1,6 +1,6 @@
 # Spring Artisan
 
-A powerful code generator for Spring Boot projects, inspired by Laravel Artisan. Scaffold models, services, controllers, repositories, DTOs, mappers, tests, and more with a single command.
+A powerful code generator for Spring Boot projects, inspired by Laravel Artisan. Scaffold models, services, controllers, repositories, DTOs, mappers, tests, auth, and more with a single command.
 
 ## Features
 
@@ -8,6 +8,7 @@ A powerful code generator for Spring Boot projects, inspired by Laravel Artisan.
 - **Best Practices** — Follows Spring conventions and clean architecture patterns
 - **Flexible** — Generate individual layers or everything at once
 - **Kotlin Support** — Generate Java or Kotlin source files
+- **JWT Auth Scaffold** — Full authentication system (SecurityConfig, JwtUtil, AuthController, AuthService, DTOs) in one command
 - **Entity YAML Definitions** — Define entities in YAML, generate all layers in one command
 - **Relationships** — `@ManyToOne` and `@OneToMany` annotations generated automatically
 - **Pagination** — `Page<T>` endpoints with a single flag
@@ -97,6 +98,89 @@ spring-artisan init
 ```
 
 Detects `pom.xml` or `build.gradle`, reads the project metadata, and creates `spring-artisan.yml`. If no build file is found, prints instructions to create the config manually.
+
+---
+
+### `make auth` — JWT Authentication Scaffold
+
+```bash
+spring-artisan make auth
+```
+
+Generates a complete JWT authentication system in one command — 9 production-ready files wired together:
+
+```
+src/main/java/com/yourcompany/yourapp/
+├── security/
+│   ├── SecurityConfig.java          ← filter chain, CSRF off, stateless
+│   ├── JwtUtil.java                 ← token generation and validation
+│   ├── JwtAuthFilter.java           ← OncePerRequestFilter for Bearer tokens
+│   └── CustomUserDetailsService.java← UserDetailsService impl
+├── controller/
+│   └── AuthController.java          ← POST /api/auth/register + /api/auth/login
+├── service/
+│   └── AuthService.java             ← register (BCrypt encode) + login
+└── dto/
+    ├── LoginRequest.java
+    ├── RegisterRequest.java
+    └── AuthResponse.java            ← { token, type: "Bearer" }
+```
+
+If no `User` entity is found, the command asks interactively whether to generate one:
+
+```
+[WARN] No User entity found at: src/main/java/.../model/User.java
+Generate User entity with email + password fields? [Y/n]:
+```
+
+After generation, the command prints the exact `pom.xml` dependencies to add.
+
+| Flag | Description |
+|---|---|
+| `--entity` | Name of the user entity (default: `User`) |
+| `--username-field` | Field used as login key (default: `email`) |
+| `--dry-run` | Preview files without writing them |
+
+```bash
+# Custom entity and username field
+spring-artisan make auth --entity Account --username-field username
+
+# Preview only
+spring-artisan make auth --dry-run
+```
+
+**Required dependencies** (add to your `pom.xml`):
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>0.11.5</version>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>0.11.5</version>
+    <scope>runtime</scope>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.11.5</version>
+    <scope>runtime</scope>
+</dependency>
+```
+
+**Add to `application.properties`:**
+
+```properties
+jwt.secret=your-256-bit-secret-key-change-in-production
+jwt.expiration=86400000
+```
 
 ---
 
@@ -417,6 +501,36 @@ All generated files include a header:
  */
 ```
 
+### JWT Auth — SecurityConfig
+
+```java
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    private final JwtAuthFilter jwtAuthFilter;
+    private final UserDetailsService userDetailsService;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
+}
+```
+
 ### Model with relationships
 
 ```java
@@ -477,26 +591,6 @@ public interface UserMapper {
 }
 ```
 
-### Global exception handler
-
-```java
-@RestControllerAdvice
-public class GlobalExceptionHandler {
-
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(404, ex.getMessage()));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) { ... }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneral(Exception ex) { ... }
-}
-```
-
 ---
 
 ## Maven Plugin (Alternative to CLI)
@@ -540,6 +634,7 @@ Then run:
 mvn spring-artisan:model -Dname=User -Dfields="id:uuid,name:string"
 mvn spring-artisan:service -Dname=User
 mvn spring-artisan:controller -Dname=User
+mvn spring-artisan:auth -Dentity=User -DusernameField=email
 mvn spring-artisan:model -Dname=User -Dlanguage=kotlin
 ```
 
@@ -552,10 +647,13 @@ spring-artisan/
 ├── spring-artisan-core/
 │   ├── config/          # ConfigLoader, GeneratorConfig, EntityYamlLoader
 │   ├── model/           # EntityDefinition, EntityField, FieldType
-│   ├── generator/       # One generator class per artifact type
+│   ├── generator/       # One generator class per artifact type + AuthScaffoldGenerator
 │   ├── template/        # Freemarker engine wrapper
 │   └── resources/
-│       └── templates/   # Java and Kotlin .ftl template files
+│       └── templates/
+│           ├── *.ftl         # Java templates
+│           ├── *.kt.ftl      # Kotlin templates
+│           └── auth/         # JWT auth scaffold templates
 ├── spring-artisan-cli/
 │   └── commands/        # Picocli command classes
 ├── spring-artisan-maven-plugin/
@@ -572,8 +670,26 @@ spring-artisan/
 - **Lombok** — Boilerplate reduction
 - **MapStruct** — Mapper generation
 - **SnakeYAML** — Configuration and entity definition parsing
-- **JUnit 5** — Test generation
+- **JUnit 5** — Test generation and 177-test suite
 - **Maven** — Build and plugin management
+
+---
+
+## CI / CD
+
+Every push to `master`:
+1. Runs 177 tests automatically
+2. If tests pass and the version in `pom.xml` has changed, creates a GitHub Release and attaches the JAR
+
+To release a new version:
+
+```bash
+mvn versions:set -DnewVersion=1.1.0 -DgenerateBackupPoms=false
+git add pom.xml **/pom.xml
+git commit -m "bump version to 1.1.0"
+git push origin master
+# → CI runs tests → publishes release v1.1.0 automatically
+```
 
 ---
 
