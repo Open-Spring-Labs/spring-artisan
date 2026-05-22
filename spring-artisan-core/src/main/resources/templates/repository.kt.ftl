@@ -6,8 +6,20 @@ package ${repositoryPackage}
 
 import ${packageName}.model.${entityName}
 import org.springframework.data.jpa.repository.JpaRepository
+<#if paginated>
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+</#if>
 import org.springframework.stereotype.Repository
+import java.util.Optional
 import java.util.UUID
 
 @Repository
-interface ${repositoryName} : JpaRepository<${entityName}, UUID>
+interface ${repositoryName} : JpaRepository<${entityName}, UUID> {
+<#list findByFields as field>
+    fun findBy${field?cap_first}(${field}: String): Optional<${entityName}>
+</#list>
+<#if paginated>
+    fun findAll(pageable: Pageable): Page<${entityName}>
+</#if>
+}

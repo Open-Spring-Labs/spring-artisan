@@ -10,6 +10,9 @@ import java.util.UUID
 <#list imports as import>
 ${import}
 </#list>
+<#if belongsTo?has_content || hasMany?has_content>
+import java.util.ArrayList
+</#if>
 
 @Entity
 @Table(name = "${tableName}")
@@ -25,6 +28,12 @@ class ${entityName}(
     var ${field.name}: ${field.kotlinType}? = null,
 </#if>
 </#list>
+<#list belongsTo as parent>
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "${parent?lower_case}_id")
+    var ${parent?lower_case}: ${parent}? = null,
+</#list>
 
     @Column(name = "created_at", nullable = false, updatable = false)
     var createdAt: LocalDateTime? = null,
@@ -32,6 +41,11 @@ class ${entityName}(
     @Column(name = "updated_at")
     var updatedAt: LocalDateTime? = null
 ) {
+<#list hasMany as child>
+    @OneToMany(mappedBy = "${entityNameLower}", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val ${child?lower_case}s: MutableList<${child}> = ArrayList()
+
+</#list>
     @PrePersist
     protected fun onCreate() {
         createdAt = LocalDateTime.now()

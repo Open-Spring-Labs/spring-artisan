@@ -23,6 +23,21 @@ public class EntityDefinition {
     private String tableName;
     private boolean withService;
     private boolean withRepository;
+    private boolean paginated;
+    private boolean secured;
+    private boolean withOpenApi;
+    private boolean reactive;
+    private boolean withMigration;
+    private boolean integrationTest;
+
+    @Builder.Default
+    private List<String> findByFields = new ArrayList<>();
+
+    @Builder.Default
+    private List<String> belongsTo = new ArrayList<>();
+
+    @Builder.Default
+    private List<String> hasMany = new ArrayList<>();
 
     @Builder.Default
     private List<EntityField> relationships = new ArrayList<>();

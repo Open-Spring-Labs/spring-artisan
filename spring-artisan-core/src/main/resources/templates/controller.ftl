@@ -9,15 +9,34 @@ import ${packageName}.model.${entityName};
 import ${packageName}.service.${serviceName};
 import lombok.RequiredArgsConstructor;
 </#if>
+<#if paginated>
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+<#else>
+import java.util.List;
+</#if>
+<#if reactive>
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+</#if>
+<#if withOpenApi>
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+</#if>
+<#if secured>
+import org.springframework.security.access.prepost.PreAuthorize;
+</#if>
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("${apiPrefix}/${entityNameLower}")
+<#if withOpenApi>
+@Tag(name = "${entityName}", description = "${entityName} management API")
+</#if>
 <#if withService>
 @RequiredArgsConstructor
 </#if>
@@ -25,77 +44,181 @@ public class ${controllerName} {
 <#if withService>
 
     private final ${serviceName} service;
+</#if>
 
+    <#if withOpenApi>
+    @Operation(summary = "Get all ${entityNameLower}s")
+    @ApiResponse(responseCode = "200", description = "List retrieved successfully")
+    </#if>
+    <#if secured>
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    </#if>
     @GetMapping
-    public ResponseEntity<List<${entityName}>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+    <#if reactive>
+    public Flux<${entityName}> getAll() {
+        <#if withService>
+        return service.findAll();
+        <#else>
+        // TODO: implement
+        return Flux.empty();
+        </#if>
     }
+    <#elseif paginated>
+    public ResponseEntity<Page<${entityName}>> getAll(Pageable pageable) {
+        <#if withService>
+        return ResponseEntity.ok(service.findAll(pageable));
+        <#else>
+        // TODO: implement
+        return ResponseEntity.ok().build();
+        </#if>
+    }
+    <#else>
+    public ResponseEntity<List<${entityName}>> getAll() {
+        <#if withService>
+        return ResponseEntity.ok(service.findAll());
+        <#else>
+        // TODO: implement
+        return ResponseEntity.ok().build();
+        </#if>
+    }
+    </#if>
 
+    <#if withOpenApi>
+    @Operation(summary = "Get ${entityNameLower} by ID")
+    @ApiResponse(responseCode = "200", description = "Found")
+    @ApiResponse(responseCode = "404", description = "Not found")
+    </#if>
+    <#if secured>
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    </#if>
     @GetMapping("/{id}")
+    <#if reactive>
+    public Mono<ResponseEntity<${entityName}>> getById(@PathVariable UUID id) {
+        <#if withService>
+        return service.findById(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+        <#else>
+        // TODO: implement
+        return Mono.just(ResponseEntity.ok().build());
+        </#if>
+    }
+    <#else>
     public ResponseEntity<${entityName}> getById(@PathVariable UUID id) {
+        <#if withService>
         return service.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+        <#else>
+        // TODO: implement
+        return ResponseEntity.ok().build();
+        </#if>
     }
+    </#if>
 
+    <#if withOpenApi>
+    @Operation(summary = "Create ${entityNameLower}")
+    @ApiResponse(responseCode = "201", description = "Created successfully")
+    </#if>
+    <#if secured>
+    @PreAuthorize("hasRole('ADMIN')")
+    </#if>
     @PostMapping
+    <#if reactive>
+    public Mono<ResponseEntity<${entityName}>> create(@RequestBody ${entityName} entity) {
+        <#if withService>
+        return service.save(entity)
+                .map(saved -> ResponseEntity.status(HttpStatus.CREATED).body(saved));
+        <#else>
+        // TODO: implement
+        return Mono.just(ResponseEntity.status(HttpStatus.CREATED).build());
+        </#if>
+    }
+    <#else>
     public ResponseEntity<${entityName}> create(@RequestBody ${entityName} entity) {
+        <#if withService>
         ${entityName} saved = service.save(entity);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        <#else>
+        // TODO: implement
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+        </#if>
     }
+    </#if>
 
+    <#if withOpenApi>
+    @Operation(summary = "Update ${entityNameLower}")
+    @ApiResponse(responseCode = "200", description = "Updated successfully")
+    @ApiResponse(responseCode = "404", description = "Not found")
+    </#if>
+    <#if secured>
+    @PreAuthorize("hasRole('ADMIN')")
+    </#if>
     @PutMapping("/{id}")
-    public ResponseEntity<${entityName}> update(
-            @PathVariable UUID id,
-            @RequestBody ${entityName} entity) {
+    <#if reactive>
+    public Mono<ResponseEntity<${entityName}>> update(@PathVariable UUID id, @RequestBody ${entityName} entity) {
+        <#if withService>
+        return service.findById(id)
+                .flatMap(existing -> {
+                    entity.setId(id);
+                    return service.save(entity);
+                })
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+        <#else>
+        // TODO: implement
+        return Mono.just(ResponseEntity.ok().build());
+        </#if>
+    }
+    <#else>
+    public ResponseEntity<${entityName}> update(@PathVariable UUID id, @RequestBody ${entityName} entity) {
+        <#if withService>
         return service.findById(id)
                 .map(existing -> {
                     entity.setId(id);
                     return ResponseEntity.ok(service.save(entity));
                 })
                 .orElse(ResponseEntity.notFound().build());
+        <#else>
+        // TODO: implement
+        return ResponseEntity.ok().build();
+        </#if>
     }
+    </#if>
 
+    <#if withOpenApi>
+    @Operation(summary = "Delete ${entityNameLower}")
+    @ApiResponse(responseCode = "204", description = "Deleted successfully")
+    @ApiResponse(responseCode = "404", description = "Not found")
+    </#if>
+    <#if secured>
+    @PreAuthorize("hasRole('ADMIN')")
+    </#if>
     @DeleteMapping("/{id}")
+    <#if reactive>
+    public Mono<ResponseEntity<Void>> delete(@PathVariable UUID id) {
+        <#if withService>
+        return service.existsById(id)
+                .flatMap(exists -> exists
+                        ? service.deleteById(id).then(Mono.just(ResponseEntity.<Void>noContent().build()))
+                        : Mono.just(ResponseEntity.<Void>notFound().build()));
+        <#else>
+        // TODO: implement
+        return Mono.just(ResponseEntity.<Void>noContent().build());
+        </#if>
+    }
+    <#else>
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        <#if withService>
         if (service.existsById(id)) {
             service.deleteById(id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
-    }
-<#else>
-
-    @GetMapping
-    public ResponseEntity<List<${entityName}>> getAll() {
-        // TODO: implement
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<${entityName}> getById(@PathVariable UUID id) {
-        // TODO: implement
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping
-    public ResponseEntity<${entityName}> create(@RequestBody ${entityName} entity) {
-        // TODO: implement
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<${entityName}> update(
-            @PathVariable UUID id,
-            @RequestBody ${entityName} entity) {
-        // TODO: implement
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        <#else>
         // TODO: implement
         return ResponseEntity.noContent().build();
+        </#if>
     }
-</#if>
+    </#if>
 }

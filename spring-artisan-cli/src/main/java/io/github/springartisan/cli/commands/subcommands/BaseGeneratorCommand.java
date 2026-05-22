@@ -46,6 +46,11 @@ public abstract class BaseGeneratorCommand implements Callable<Integer> {
             description = "Target language: java or kotlin")
     protected String language;
 
+    @CommandLine.Option(names = {"--dry-run"},
+            defaultValue = "false",
+            description = "Preview files that would be generated without writing them")
+    protected boolean dryRun;
+
     protected BaseGeneratorCommand() {
         this.config = ConfigLoader.load();
         this.templateEngine = new TemplateEngine(config);
@@ -79,18 +84,20 @@ public abstract class BaseGeneratorCommand implements Callable<Integer> {
 
     protected void writeGeneratedCode(String code, CodeGenerator generator, EntityDefinition entity)
             throws IOException {
+        boolean isTest = generator instanceof TestGenerator || generator instanceof IntegrationTestGenerator;
         String outputDir = this.outputPath != null ?
                 this.outputPath :
-                (generator instanceof TestGenerator ? config.getEffectiveTestOutputDir() : config.getEffectiveOutputDir());
+                (isTest ? config.getEffectiveTestOutputDir() : config.getEffectiveOutputDir());
 
         Path outputPathFull = Paths.get(outputDir, generator.getOutputPath(entity));
-        
-        // Create directories if they don't exist
+
+        if (dryRun) {
+            System.out.println("[DRY RUN] Would generate: " + outputPathFull);
+            return;
+        }
+
         Files.createDirectories(outputPathFull.getParent());
-        
-        // Write file
         Files.write(outputPathFull, code.getBytes());
-        
         System.out.println("✓ Generated: " + outputPathFull);
     }
 

@@ -1,15 +1,25 @@
 # Spring Artisan
 
-A powerful code generator for Spring Boot projects, inspired by Laravel Artisan. Scaffold models, services, controllers, repositories, DTOs, and tests with a single command.
+A powerful code generator for Spring Boot projects, inspired by Laravel Artisan. Scaffold models, services, controllers, repositories, DTOs, mappers, tests, and more with a single command.
 
 ## Features
 
 - **Rapid Development** — Generate complete Spring Boot boilerplate in seconds
 - **Best Practices** — Follows Spring conventions and clean architecture patterns
-- **Customizable** — Configure via `spring-artisan.yml` in your project root
+- **Flexible** — Generate individual layers or everything at once
 - **Kotlin Support** — Generate Java or Kotlin source files
-- **Test Ready** — Auto-generates JUnit 5 test classes
-- **Full Stack** — Generate model, service, repository, controller, DTO, and tests together
+- **Entity YAML Definitions** — Define entities in YAML, generate all layers in one command
+- **Relationships** — `@ManyToOne` and `@OneToMany` annotations generated automatically
+- **Pagination** — `Page<T>` endpoints with a single flag
+- **Reactive** — WebFlux `Mono`/`Flux` support
+- **OpenAPI** — Swagger `@Operation` annotations on controllers
+- **Security** — `@PreAuthorize` annotations on controller endpoints
+- **Database Migrations** — Flyway SQL migration files alongside your entity
+- **GraphQL** — Generate Spring GraphQL resolvers
+- **MapStruct** — Generate mapper interfaces automatically
+- **Global Error Handling** — `@RestControllerAdvice` exception handler in one command
+- **Audit** — Check your project for missing or inconsistent layers
+- **Dry Run** — Preview what would be generated before writing any files
 
 ---
 
@@ -41,21 +51,19 @@ spring-artisan --version
 spring-artisan update
 ```
 
-This checks GitHub for the latest release and updates automatically if a newer version is available.
-
 ---
 
 ## Quick Start
 
 ### 1. Initialize your project
 
-Run this from your project root (where `pom.xml` or `build.gradle` lives):
+Run from your project root (where `pom.xml` or `build.gradle` lives):
 
 ```bash
 spring-artisan init
 ```
 
-Spring Artisan detects your project, reads the `groupId` and `artifactId` from your build file, and walks you through a short setup:
+Spring Artisan reads your build file, detects the package, and walks you through a short setup:
 
 ```
 Detected Maven project (pom.xml)
@@ -67,8 +75,6 @@ Language (java/kotlin) [java]:
 
 Created spring-artisan.yml successfully!
 ```
-
-This creates a `spring-artisan.yml` in your project root. If no `pom.xml` or `build.gradle` is found, it prints instructions to create the file manually.
 
 ### 2. Generate code
 
@@ -84,30 +90,175 @@ Files are created under `src/main/java/com/yourcompany/yourapp/model/User.java`,
 
 ## Commands
 
-### Generate a single component
+### `init` — Initialize the project
+
+```bash
+spring-artisan init
+```
+
+Detects `pom.xml` or `build.gradle`, reads the project metadata, and creates `spring-artisan.yml`. If no build file is found, prints instructions to create the config manually.
+
+---
+
+### `make model` — JPA Entity
 
 ```bash
 spring-artisan make model User --fields "id:uuid,name:string,email:string,age:integer"
-spring-artisan make service User
-spring-artisan make controller User
-spring-artisan make repository User
-spring-artisan make dto User
-spring-artisan make test UserService
+
+# With a Flyway migration file
+spring-artisan make model User --fields "id:uuid,name:string" --with-migration
+
+# With relationships
+spring-artisan make model Order --fields "id:uuid,amount:double" \
+  --belongs-to User \
+  --has-many Item
 ```
 
-### Generate all components at once (recommended)
+| Flag | Description |
+|---|---|
+| `--fields` | Field definitions: `name:type` comma-separated |
+| `--with-migration` | Also generate a Flyway SQL migration file |
+| `--belongs-to` | `@ManyToOne` relationships (comma-separated) |
+| `--has-many` | `@OneToMany` relationships (comma-separated) |
+
+---
+
+### `make service` — Service Layer
+
+```bash
+# Bare service with stub methods
+spring-artisan make service User
+
+# Service wired to repository with full CRUD
+spring-artisan make service User --with-repository
+
+# Reactive service using Mono/Flux
+spring-artisan make service User --with-repository --reactive
+```
+
+| Flag | Description |
+|---|---|
+| `--with-repository` | Inject repository, generate full CRUD methods |
+| `--reactive` | Use `Mono`/`Flux` instead of `Optional`/`List` |
+
+---
+
+### `make controller` — REST Controller
+
+```bash
+# Bare controller with stub methods
+spring-artisan make controller User
+
+# Fully featured controller
+spring-artisan make controller User \
+  --with-service \
+  --paginated \
+  --secured \
+  --with-openapi
+```
+
+| Flag | Description |
+|---|---|
+| `--with-service` | Inject service with full CRUD methods |
+| `--paginated` | Use `Page<T>` instead of `List<T>` |
+| `--secured` | Add `@PreAuthorize` on each endpoint |
+| `--with-openapi` | Add `@Operation` and `@ApiResponse` annotations |
+| `--reactive` | Use `Mono`/`Flux` return types |
+
+---
+
+### `make repository` — JPA Repository
+
+```bash
+spring-artisan make repository User
+
+# With custom findBy methods
+spring-artisan make repository User --find-by "email,status"
+
+# With paginated findAll
+spring-artisan make repository User --paginated
+```
+
+| Flag | Description |
+|---|---|
+| `--find-by` | Generate `findBy<Field>` methods (comma-separated) |
+| `--paginated` | Add `findAll(Pageable)` method |
+
+---
+
+### `make dto` — Data Transfer Object
+
+```bash
+spring-artisan make dto User
+```
+
+---
+
+### `make mapper` — MapStruct Mapper
+
+```bash
+spring-artisan make mapper User
+```
+
+Generates a MapStruct `UserMapper` interface with `toDTO()`, `toEntity()`, and `updateEntity()` methods.
+
+> Requires `mapstruct` dependency in your `pom.xml`.
+
+---
+
+### `make resolver` — GraphQL Resolver
+
+```bash
+spring-artisan make resolver User
+```
+
+Generates a Spring GraphQL `@QueryMapping` / `@MutationMapping` resolver wired to `UserService`.
+
+> Requires `spring-boot-starter-graphql` dependency.
+
+---
+
+### `make exception-handler` — Global Error Handler
+
+```bash
+spring-artisan make exception-handler
+```
+
+Generates two files in your `exception` package:
+- `GlobalExceptionHandler` — handles `ResourceNotFoundException`, validation errors, and generic exceptions
+- `ResourceNotFoundException` — standard 404 exception
+
+---
+
+### `make test` — Test Class
+
+```bash
+# Unit test (Mockito, default)
+spring-artisan make test UserService
+
+# Integration test (@DataJpaTest)
+spring-artisan make test User --integration
+```
+
+| Flag | Description |
+|---|---|
+| `--integration` | Generate `@DataJpaTest` integration test instead of unit test |
+
+---
+
+### `make resource` — All Layers at Once
 
 ```bash
 spring-artisan make resource User \
-  --fields "id:uuid,name:string,email:string,age:integer" \
+  --fields "id:uuid,name:string,email:string" \
   --with-tests
 ```
 
-This creates 6 files in one command:
+Generates all 6 files in one command:
 
 ```
 src/main/java/com/yourcompany/yourapp/
-├── model/UserRepository.java
+├── model/User.java
 ├── service/UserService.java
 ├── repository/UserRepository.java
 ├── controller/UserController.java
@@ -117,15 +268,98 @@ src/test/java/com/yourcompany/yourapp/
 └── service/UserServiceTest.java
 ```
 
-### Options
+---
 
-| Option | Short | Description |
-|---|---|---|
-| `--fields` | `-f` | Field definitions: `name:type,name:type` |
-| `--with-tests` | `-w` | Also generate a test class |
-| `--api-prefix` | `-a` | Override API prefix for this command |
-| `--language` | `-l` | `java` (default) or `kotlin` |
-| `--path` | `-p` | Custom output directory |
+### `make entity` — Generate from YAML Definition
+
+Define an entity in a YAML file, then generate all layers from it:
+
+**1. Create `entities/User.yml` in your project root:**
+
+```yaml
+name: User
+fields:
+  - id: uuid
+  - name: string
+  - email: string:unique
+  - age: integer
+relationships:
+  - belongs-to: Role
+  - has-many: Order
+```
+
+**2. Generate:**
+
+```bash
+spring-artisan make entity User --with-tests
+```
+
+---
+
+### `make all` — Generate from All YAML Definitions
+
+```bash
+spring-artisan make all
+spring-artisan make all --with-tests --dry-run
+```
+
+Processes every file in the `entities/` directory and generates all layers for each.
+
+---
+
+### `list` — Show Generated Entities
+
+```bash
+spring-artisan list
+```
+
+```
+Entity                model  service  repository  controller  dto  mapper  resolver
+--------------------------------------------------------------------------------
+Order                 ✓      ✓        ✓           ✓           ✓    -       -
+Product               ✓      -        -            -           -    -       -
+User                  ✓      ✓        ✓           ✓           ✓    ✓       -
+```
+
+---
+
+### `audit` — Check for Missing Layers
+
+```bash
+spring-artisan audit
+```
+
+```
+Audit Results:
+------------------------------------------------------------
+  ✓ Order                OK
+  ✗ Product              service exists but no repository, controller exists but no DTO
+  ✓ User                 OK
+------------------------------------------------------------
+Issues found. Run the missing generators to fix them.
+```
+
+---
+
+## Global Flags
+
+These flags work on every `make` command:
+
+| Flag | Description |
+|---|---|
+| `--dry-run` | Preview files that would be generated without writing them |
+| `--language` | `java` (default) or `kotlin` |
+| `--with-tests` | Also generate a test class |
+| `--api-prefix` | Override the API prefix for this command |
+| `--path` | Custom output directory |
+
+```bash
+# Preview everything without writing
+spring-artisan make resource User --fields "id:uuid,name:string" --dry-run
+
+# Generate Kotlin files
+spring-artisan make resource User --language kotlin
+```
 
 ---
 
@@ -142,11 +376,19 @@ src/test/java/com/yourcompany/yourapp/
 | `timestamp` | `LocalDateTime` | `LocalDateTime` |
 | `uuid` | `UUID` | `UUID` |
 
+Field modifiers (append with `:`):
+
+```
+id:uuid:unique       → unique constraint
+email:string:unique  → unique constraint
+name:string          → nullable by default
+```
+
 ---
 
 ## Configuration
 
-`spring-artisan init` generates this file automatically. You can also create or edit it by hand. All settings are optional — Spring Artisan uses sensible defaults for anything not specified.
+`spring-artisan init` generates this file automatically. All settings are optional.
 
 ```yaml
 spring-artisan:
@@ -164,30 +406,9 @@ spring-artisan:
 
 ---
 
-## Kotlin Support
-
-Pass `--language kotlin` to generate `.kt` files. Output is automatically written to `src/main/kotlin` and `src/test/kotlin`.
-
-```bash
-spring-artisan make resource Order \
-  --fields "id:uuid,amount:double,status:string" \
-  --language kotlin \
-  --with-tests
-```
-
-Or set it permanently in `spring-artisan.yml`:
-
-```yaml
-spring-artisan:
-  package-base: com.yourcompany.yourapp
-  language: kotlin
-```
-
----
-
 ## Generated Code Examples
 
-All generated files include a header with your name:
+All generated files include a header:
 
 ```java
 /**
@@ -196,98 +417,83 @@ All generated files include a header with your name:
  */
 ```
 
-### Model (Entity)
+### Model with relationships
 
 ```java
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "orders")
+public class Order {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "name", nullable = false)
-    @NotBlank(message = "name cannot be blank")
-    private String name;
+    @Column(name = "amount")
+    private Double amount;
 
-    @Column(name = "email", unique = true, nullable = false)
-    @NotBlank(message = "email cannot be blank")
-    private String email;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() { ... }
-
-    @PreUpdate
-    protected void onUpdate() { ... }
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Item> items = new ArrayList<>();
 }
 ```
 
-### Service
-
-```java
-@Service
-@RequiredArgsConstructor
-@Transactional
-public class UserService {
-
-    private final UserRepository repository;
-
-    @Transactional(readOnly = true)
-    public List<User> findAll() { return repository.findAll(); }
-
-    @Transactional(readOnly = true)
-    public Optional<User> findById(UUID id) { return repository.findById(id); }
-
-    public User save(User entity) { return repository.save(entity); }
-
-    public void deleteById(UUID id) { repository.deleteById(id); }
-}
-```
-
-### Controller
+### Paginated controller with OpenAPI and security
 
 ```java
 @RestController
 @RequestMapping("/api/v1/user")
+@Tag(name = "User", description = "User management API")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService service;
 
     @GetMapping
-    public ResponseEntity<List<User>> getAll() { ... }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getById(@PathVariable UUID id) { ... }
+    @Operation(summary = "Get all users")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<Page<User>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(service.findAll(pageable));
+    }
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody User entity) { ... }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable UUID id, @RequestBody User entity) { ... }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) { ... }
+    @Operation(summary = "Create user")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<User> create(@RequestBody User entity) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.save(entity));
+    }
 }
 ```
 
-### Repository
+### MapStruct mapper
 
 ```java
-@Repository
-public interface UserRepository extends JpaRepository<User, UUID> {
-    // Add custom queries here
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface UserMapper {
+    UserDTO toDTO(User entity);
+    User toEntity(UserDTO dto);
+    void updateEntity(UserDTO dto, @MappingTarget User entity);
+}
+```
+
+### Global exception handler
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(404, ex.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) { ... }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGeneral(Exception ex) { ... }
 }
 ```
 
@@ -295,7 +501,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
 ## Maven Plugin (Alternative to CLI)
 
-If you prefer to generate code via Maven goals instead of the CLI, add the plugin to your `pom.xml`:
+Add to your project's `pom.xml`:
 
 ```xml
 <build>
@@ -331,7 +537,7 @@ Add GitHub credentials to `~/.m2/settings.xml`:
 Then run:
 
 ```bash
-mvn spring-artisan:model -Dname=User -Dfields="id:uuid,name:string,email:string"
+mvn spring-artisan:model -Dname=User -Dfields="id:uuid,name:string"
 mvn spring-artisan:service -Dname=User
 mvn spring-artisan:controller -Dname=User
 mvn spring-artisan:model -Dname=User -Dlanguage=kotlin
@@ -343,25 +549,29 @@ mvn spring-artisan:model -Dname=User -Dlanguage=kotlin
 
 ```
 spring-artisan/
-├── spring-artisan-core/           # Core generation engine
-│   ├── config/                    # Configuration loading (spring-artisan.yml)
-│   ├── model/                     # Entity and field definitions
-│   ├── generator/                 # Code generators (one per artifact type)
-│   ├── template/                  # Freemarker integration
-│   └── resources/templates/       # Java and Kotlin Freemarker templates
-├── spring-artisan-cli/            # Standalone CLI (Picocli)
-├── spring-artisan-maven-plugin/   # Maven plugin
-├── install.sh                     # Mac/Linux installer
-└── install.ps1                    # Windows installer
+├── spring-artisan-core/
+│   ├── config/          # ConfigLoader, GeneratorConfig, EntityYamlLoader
+│   ├── model/           # EntityDefinition, EntityField, FieldType
+│   ├── generator/       # One generator class per artifact type
+│   ├── template/        # Freemarker engine wrapper
+│   └── resources/
+│       └── templates/   # Java and Kotlin .ftl template files
+├── spring-artisan-cli/
+│   └── commands/        # Picocli command classes
+├── spring-artisan-maven-plugin/
+│   └── Mojos/           # Maven goal implementations
+├── install.sh           # Mac/Linux installer
+└── install.ps1          # Windows installer
 ```
 
 ## Technologies
 
-- **Java 17+**
+- **Java 17+** / **Kotlin**
 - **Freemarker** — Template engine
 - **Picocli** — CLI framework
 - **Lombok** — Boilerplate reduction
-- **SnakeYAML** — Configuration parsing
+- **MapStruct** — Mapper generation
+- **SnakeYAML** — Configuration and entity definition parsing
 - **JUnit 5** — Test generation
 - **Maven** — Build and plugin management
 
@@ -371,8 +581,8 @@ spring-artisan/
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes (`git commit -m "Add my feature"`)
-4. Push to the branch (`git push origin feature/my-feature`)
+3. Commit your changes
+4. Push to the branch
 5. Open a Pull Request
 
 ---

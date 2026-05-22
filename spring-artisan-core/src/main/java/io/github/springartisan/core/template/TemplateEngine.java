@@ -63,6 +63,15 @@ public class TemplateEngine {
         model.put("apiPrefix", config.getApiPrefix());
         model.put("withService", entity.isWithService());
         model.put("withRepository", entity.isWithRepository());
+        model.put("paginated", entity.isPaginated());
+        model.put("secured", entity.isSecured());
+        model.put("withOpenApi", entity.isWithOpenApi());
+        model.put("reactive", entity.isReactive());
+        model.put("withMigration", entity.isWithMigration());
+        model.put("integrationTest", entity.isIntegrationTest());
+        model.put("findByFields", entity.getFindByFields());
+        model.put("belongsTo", entity.getBelongsTo());
+        model.put("hasMany", entity.getHasMany());
         
         // Service and DTO names
         model.put("serviceName", entity.getServiceName());

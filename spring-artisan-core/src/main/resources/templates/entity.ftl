@@ -11,9 +11,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 </#if>
+<#if addValidation>
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+</#if>
 <#list imports as import>
 ${import}
 </#list>
+<#if belongsTo?has_content || hasMany?has_content>
+import java.util.List;
+</#if>
 
 <#if useLombok>
 @Data
@@ -24,14 +31,14 @@ ${import}
 @Entity
 @Table(name = "${tableName}")
 public class ${entityName} {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     private java.util.UUID id;
 <#list fields as field>
-    <#if field.name != "id">
-    
+<#if field.name != "id">
+
     <#if addValidation && field.type.name() == "STRING">
     @Column(name = "${field.name}"<#if field.unique>, unique = true</#if><#if !field.nullable>, nullable = false</#if>)
     @NotBlank(message = "${field.name} cannot be blank")
@@ -39,7 +46,19 @@ public class ${entityName} {
     @Column(name = "${field.name}"<#if field.unique>, unique = true</#if><#if !field.nullable>, nullable = false</#if>)
     </#if>
     private ${field.javaType} ${field.name};
-    </#if>
+</#if>
+</#list>
+<#list belongsTo as parent>
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "${parent?lower_case}_id")
+    private ${parent} ${parent?lower_case};
+</#list>
+<#list hasMany as child>
+
+    @OneToMany(mappedBy = "${entityNameLower}", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<${child}> ${child?lower_case}s = new java.util.ArrayList<>();
 </#list>
 
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -6,15 +6,20 @@ package ${repositoryPackage};
 
 import ${packageName}.model.${entityName};
 import org.springframework.data.jpa.repository.JpaRepository;
+<#if paginated>
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+</#if>
 import org.springframework.stereotype.Repository;
-
+import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Repository for ${entityName} entity
- * Provides CRUD operations and custom queries
- */
 @Repository
 public interface ${repositoryName} extends JpaRepository<${entityName}, UUID> {
-    // Custom queries can be added here
+<#list findByFields as field>
+    Optional<${entityName}> findBy${field?cap_first}(String ${field});
+</#list>
+<#if paginated>
+    Page<${entityName}> findAll(Pageable pageable);
+</#if>
 }

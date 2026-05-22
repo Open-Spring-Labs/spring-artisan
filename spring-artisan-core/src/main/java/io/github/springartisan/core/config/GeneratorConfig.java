@@ -55,6 +55,10 @@ public class GeneratorConfig {
         return isKotlin() ? "src/test/kotlin" : testOutputDir;
     }
 
+    public String getPackageBase() {
+        return packageBase;
+    }
+
     public String getModelPackage() {
         return packageBase + ".model";
     }
