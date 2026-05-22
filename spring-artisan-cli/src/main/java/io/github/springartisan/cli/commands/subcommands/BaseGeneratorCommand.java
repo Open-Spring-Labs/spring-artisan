@@ -38,9 +38,13 @@ public abstract class BaseGeneratorCommand implements Callable<Integer> {
             description = "Generate test class")
     protected boolean withTests;
 
-    @CommandLine.Option(names = {"-a", "--api-prefix"}, 
+    @CommandLine.Option(names = {"-a", "--api-prefix"},
             description = "Custom API prefix")
     protected String apiPrefix;
+
+    @CommandLine.Option(names = {"-l", "--language"},
+            description = "Target language: java or kotlin")
+    protected String language;
 
     protected BaseGeneratorCommand() {
         this.config = ConfigLoader.load();
@@ -68,12 +72,12 @@ public abstract class BaseGeneratorCommand implements Callable<Integer> {
         return entity;
     }
 
-    protected void writeGeneratedCode(String code, CodeGenerator generator, EntityDefinition entity) 
+    protected void writeGeneratedCode(String code, CodeGenerator generator, EntityDefinition entity)
             throws IOException {
-        String outputDir = this.outputPath != null ? 
-                this.outputPath : 
-                config.getOutputDir();
-        
+        String outputDir = this.outputPath != null ?
+                this.outputPath :
+                (generator instanceof TestGenerator ? config.getEffectiveTestOutputDir() : config.getEffectiveOutputDir());
+
         Path outputPathFull = Paths.get(outputDir, generator.getOutputPath(entity));
         
         // Create directories if they don't exist
@@ -90,6 +94,10 @@ public abstract class BaseGeneratorCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         try {
+            if (language != null) {
+                config.setLanguage(language);
+                templateEngine = new TemplateEngine(config);
+            }
             EntityDefinition entity = createEntityDefinition();
             CodeGenerator generator = getGenerator();
             String code = generator.generate(entity);

@@ -11,12 +11,12 @@ public class TestGenerator extends BaseGenerator {
 
     @Override
     public String getTemplateName() {
-        return "test.ftl";
+        return "test" + templateSuffix();
     }
 
     @Override
     public String getOutputPath(EntityDefinition entity) {
         String packagePath = packageToPath(config.getTestPackage());
-        return packagePath + "/" + entity.getServiceName() + "Test.java";
+        return packagePath + "/" + entity.getServiceName() + "Test" + fileExtension();
     }
 }

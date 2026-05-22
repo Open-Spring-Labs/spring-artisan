@@ -29,4 +29,12 @@ public abstract class BaseGenerator implements CodeGenerator {
     protected String packageToPath(String packageName) {
         return packageName.replace(".", "/");
     }
+
+    protected String templateSuffix() {
+        return config.isKotlin() ? ".kt.ftl" : ".ftl";
+    }
+
+    protected String fileExtension() {
+        return config.isKotlin() ? ".kt" : ".java";
+    }
 }

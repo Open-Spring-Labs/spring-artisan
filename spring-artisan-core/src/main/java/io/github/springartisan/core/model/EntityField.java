@@ -42,6 +42,10 @@ public class EntityField {
         return type.getJavaType();
     }
 
+    public String getKotlinType() {
+        return type.getKotlinType();
+    }
+
     public boolean needsImport() {
         return !type.getImportStatement().isEmpty();
     }

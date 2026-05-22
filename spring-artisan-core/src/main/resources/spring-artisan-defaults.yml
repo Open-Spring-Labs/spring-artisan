@@ -4,6 +4,7 @@ spring-artisan:
   api-prefix: /api/v1
   output-dir: src/main/java
   test-output-dir: src/test/java
+  language: java
   generators:
     include-lombok: true
     include-validation: true

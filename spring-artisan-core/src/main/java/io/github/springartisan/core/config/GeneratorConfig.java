@@ -40,6 +40,21 @@ public class GeneratorConfig {
     @Builder.Default
     private String resourcesDir = "src/main/resources";
 
+    @Builder.Default
+    private String language = "java";
+
+    public boolean isKotlin() {
+        return "kotlin".equalsIgnoreCase(language);
+    }
+
+    public String getEffectiveOutputDir() {
+        return isKotlin() ? "src/main/kotlin" : outputDir;
+    }
+
+    public String getEffectiveTestOutputDir() {
+        return isKotlin() ? "src/test/kotlin" : testOutputDir;
+    }
+
     public String getModelPackage() {
         return packageBase + ".model";
     }

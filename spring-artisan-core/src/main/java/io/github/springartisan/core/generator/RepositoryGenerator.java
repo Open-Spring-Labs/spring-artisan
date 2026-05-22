@@ -11,12 +11,12 @@ public class RepositoryGenerator extends BaseGenerator {
 
     @Override
     public String getTemplateName() {
-        return "repository.ftl";
+        return "repository" + templateSuffix();
     }
 
     @Override
     public String getOutputPath(EntityDefinition entity) {
         String packagePath = packageToPath(config.getRepositoryPackage());
-        return packagePath + "/" + entity.getRepositoryName() + ".java";
+        return packagePath + "/" + entity.getRepositoryName() + fileExtension();
     }
 }

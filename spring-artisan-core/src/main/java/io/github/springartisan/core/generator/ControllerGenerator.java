@@ -11,12 +11,12 @@ public class ControllerGenerator extends BaseGenerator {
 
     @Override
     public String getTemplateName() {
-        return "controller.ftl";
+        return "controller" + templateSuffix();
     }
 
     @Override
     public String getOutputPath(EntityDefinition entity) {
         String packagePath = packageToPath(config.getControllerPackage());
-        return packagePath + "/" + entity.getControllerName() + ".java";
+        return packagePath + "/" + entity.getControllerName() + fileExtension();
     }
 }

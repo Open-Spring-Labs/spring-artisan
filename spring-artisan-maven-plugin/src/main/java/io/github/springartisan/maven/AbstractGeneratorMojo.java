@@ -20,14 +20,29 @@ public abstract class AbstractGeneratorMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
-    @Parameter(property = "name", required = true, description = "Entity name")
+    /**
+     * Entity name
+     */
+    @Parameter(property = "name", required = true)
     protected String name;
 
-    @Parameter(property = "fields", description = "Fields: id:uuid,name:string,email:string")
+    /**
+     * Fields: id:uuid,name:string,email:string
+     */
+    @Parameter(property = "fields")
     protected String fields;
 
-    @Parameter(defaultValue = "src/main/java", property = "outputDir", description = "Output directory")
+    /**
+     * Output directory
+     */
+    @Parameter(defaultValue = "src/main/java", property = "outputDir")
     protected String outputDir;
+
+    /**
+     * Target language: java or kotlin
+     */
+    @Parameter(defaultValue = "java", property = "language")
+    protected String language;
 
     protected GeneratorConfig loadConfig() {
         return GeneratorConfig.builder()
@@ -37,6 +52,7 @@ public abstract class AbstractGeneratorMojo extends AbstractMojo {
                 .includeLombok(true)
                 .includeValidation(true)
                 .outputDir(outputDir)
+                .language(language)
                 .build();
     }
 

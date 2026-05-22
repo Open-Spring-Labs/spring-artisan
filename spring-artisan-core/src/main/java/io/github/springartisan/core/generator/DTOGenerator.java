@@ -11,12 +11,12 @@ public class DTOGenerator extends BaseGenerator {
 
     @Override
     public String getTemplateName() {
-        return "dto.ftl";
+        return "dto" + templateSuffix();
     }
 
     @Override
     public String getOutputPath(EntityDefinition entity) {
         String packagePath = packageToPath(config.getDtoPackage());
-        return packagePath + "/" + entity.getDtoName() + ".java";
+        return packagePath + "/" + entity.getDtoName() + fileExtension();
     }
 }

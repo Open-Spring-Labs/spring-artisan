@@ -1,0 +1,78 @@
+package ${testPackage}
+
+import ${packageName}.model.${entityName}
+import ${packageName}.repository.${repositoryName}
+import ${packageName}.service.${serviceName}
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.mockito.Mock
+import org.mockito.Mockito.*
+import org.mockito.MockitoAnnotations
+import org.assertj.core.api.Assertions.*
+import java.util.Optional
+import java.util.UUID
+
+@DisplayName("${serviceName} Tests")
+class ${serviceName}Test {
+
+    private lateinit var service: ${serviceName}
+
+    @Mock
+    private lateinit var repository: ${repositoryName}
+
+    @BeforeEach
+    fun setUp() {
+        MockitoAnnotations.openMocks(this)
+        service = ${serviceName}(repository)
+    }
+
+    @Test
+    @DisplayName("Should find all ${entityNameLower}s")
+    fun testFindAll() {
+        `when`(repository.findAll()).thenReturn(emptyList())
+        val result = service.findAll()
+        assertThat(result).isEmpty()
+        verify(repository, times(1)).findAll()
+    }
+
+    @Test
+    @DisplayName("Should find ${entityNameLower} by ID")
+    fun testFindById() {
+        val id = UUID.randomUUID()
+        val entity = ${entityName}(id = id)
+        `when`(repository.findById(id)).thenReturn(Optional.of(entity))
+        val result = service.findById(id)
+        assertThat(result).isPresent
+        assertThat(result.get().id).isEqualTo(id)
+        verify(repository, times(1)).findById(id)
+    }
+
+    @Test
+    @DisplayName("Should save ${entityNameLower}")
+    fun testSave() {
+        val entity = ${entityName}()
+        `when`(repository.save(entity)).thenReturn(entity)
+        val result = service.save(entity)
+        assertThat(result).isNotNull
+        verify(repository, times(1)).save(entity)
+    }
+
+    @Test
+    @DisplayName("Should delete ${entityNameLower} by ID")
+    fun testDeleteById() {
+        val id = UUID.randomUUID()
+        service.deleteById(id)
+        verify(repository, times(1)).deleteById(id)
+    }
+
+    @Test
+    @DisplayName("Should check if ${entityNameLower} exists")
+    fun testExistsById() {
+        val id = UUID.randomUUID()
+        `when`(repository.existsById(id)).thenReturn(true)
+        val result = service.existsById(id)
+        assertThat(result).isTrue
+        verify(repository, times(1)).existsById(id)
+    }
+}

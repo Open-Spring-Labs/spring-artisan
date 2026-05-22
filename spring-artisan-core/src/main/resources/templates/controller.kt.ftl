@@ -1,0 +1,46 @@
+package ${controllerPackage}
+
+import ${packageName}.model.${entityName}
+import ${packageName}.service.${serviceName}
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import java.util.UUID
+
+@RestController
+@RequestMapping("${apiPrefix}/${entityNameLower}")
+class ${controllerName}(private val service: ${serviceName}) {
+
+    @GetMapping
+    fun getAll(): ResponseEntity<List<${entityName}>> = ResponseEntity.ok(service.findAll())
+
+    @GetMapping("/{id}")
+    fun getById(@PathVariable id: UUID): ResponseEntity<${entityName}> =
+        service.findById(id)
+            .map { ResponseEntity.ok(it) }
+            .orElse(ResponseEntity.notFound().build())
+
+    @PostMapping
+    fun create(@RequestBody entity: ${entityName}): ResponseEntity<${entityName}> {
+        val saved = service.save(entity)
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved)
+    }
+
+    @PutMapping("/{id}")
+    fun update(@PathVariable id: UUID, @RequestBody entity: ${entityName}): ResponseEntity<${entityName}> =
+        service.findById(id)
+            .map {
+                entity.id = id
+                ResponseEntity.ok(service.save(entity))
+            }
+            .orElse(ResponseEntity.notFound().build())
+
+    @DeleteMapping("/{id}")
+    fun delete(@PathVariable id: UUID): ResponseEntity<Void> =
+        if (service.existsById(id)) {
+            service.deleteById(id)
+            ResponseEntity.noContent().build()
+        } else {
+            ResponseEntity.notFound().build()
+        }
+}

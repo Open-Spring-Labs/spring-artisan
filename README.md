@@ -26,7 +26,7 @@ A powerful code generator for Spring Boot projects, inspired by Laravel Artisan.
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/spring-artisan.git
+git clone https://github.com/Open-Spring-Labs/spring-artisan.git
 cd spring-artisan
 mvn clean install
 ```
@@ -94,14 +94,30 @@ spring-artisan make resource Order \
 ### Field Types
 
 Supported field types:
-- `string` - String
-- `integer` - Integer
-- `long` - Long
-- `double` - Double
-- `boolean` - Boolean
-- `date` - java.time.LocalDate
-- `timestamp` - java.time.LocalDateTime
-- `uuid` - UUID
+- `string` - String / String
+- `integer` - Integer / Int
+- `long` - Long / Long
+- `double` - Double / Double
+- `boolean` - Boolean / Boolean
+- `date` - java.time.LocalDate / LocalDate
+- `timestamp` - java.time.LocalDateTime / LocalDateTime
+- `uuid` - UUID / UUID
+
+> Types shown as `Java / Kotlin`
+
+### Kotlin Support
+
+Generate Kotlin source files by passing `--language kotlin` (CLI) or `-Dlanguage=kotlin` (Maven):
+
+```bash
+spring-artisan make resource Order \
+  --fields "id:uuid,amount:double,status:string" \
+  --language kotlin
+
+mvn spring-artisan:model -Dname=User -Dlanguage=kotlin
+```
+
+Output is written to `src/main/kotlin` and `src/test/kotlin` automatically.
 
 ### Example Usage
 
@@ -131,6 +147,7 @@ spring-artisan:
   api-prefix: /api/v1
   output-dir: src/main/java
   test-output-dir: src/test/java
+  language: java          # or kotlin
   generators:
     include-lombok: true
     include-validation: true
@@ -338,4 +355,4 @@ For issues, questions, or suggestions, please open an issue on GitHub.
 
 ---
 
-**Made with ❤️ for Spring Boot developers**
+**Made with ❤️ for Spring Artisan developer**

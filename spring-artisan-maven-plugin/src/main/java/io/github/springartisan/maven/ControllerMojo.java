@@ -21,7 +21,7 @@ public class ControllerMojo extends AbstractGeneratorMojo {
             ControllerGenerator generator = new ControllerGenerator(config, templateEngine);
             String code = generator.generate(entity);
 
-            String outputPath = "src/main/java/" + generator.getOutputPath(entity);
+            String outputPath = config.getEffectiveOutputDir() + "/" + generator.getOutputPath(entity);
             writeFile(code, outputPath);
 
             getLog().info("✓ Generated controller: " + name);

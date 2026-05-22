@@ -11,12 +11,12 @@ public class ServiceGenerator extends BaseGenerator {
 
     @Override
     public String getTemplateName() {
-        return "service.ftl";
+        return "service" + templateSuffix();
     }
 
     @Override
     public String getOutputPath(EntityDefinition entity) {
         String packagePath = packageToPath(config.getServicePackage());
-        return packagePath + "/" + entity.getServiceName() + ".java";
+        return packagePath + "/" + entity.getServiceName() + fileExtension();
     }
 }

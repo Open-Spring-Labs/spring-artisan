@@ -11,12 +11,12 @@ public class ModelGenerator extends BaseGenerator {
 
     @Override
     public String getTemplateName() {
-        return "entity.ftl";
+        return "entity" + templateSuffix();
     }
 
     @Override
     public String getOutputPath(EntityDefinition entity) {
         String packagePath = packageToPath(config.getModelPackage());
-        return packagePath + "/" + entity.getName() + ".java";
+        return packagePath + "/" + entity.getName() + fileExtension();
     }
 }

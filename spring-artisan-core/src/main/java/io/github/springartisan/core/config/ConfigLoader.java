@@ -78,7 +78,10 @@ public class ConfigLoader {
         if (config.containsKey("output-dir")) {
             builder.outputDir((String) config.get("output-dir"));
         }
-        
+        if (config.containsKey("language")) {
+            builder.language((String) config.get("language"));
+        }
+
         @SuppressWarnings("unchecked")
         Map<String, Object> generators = (Map<String, Object>) config.get("generators");
         if (generators != null) {
