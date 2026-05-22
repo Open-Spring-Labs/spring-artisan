@@ -13,15 +13,19 @@ A powerful code generator for Spring Boot projects, inspired by Laravel Artisan.
 
 ## Installation
 
-### Via Maven Central (Coming Soon)
+### Mac / Linux
 
-```xml
-<dependency>
-    <groupId>io.github.springartisan</groupId>
-    <artifactId>spring-artisan-cli</artifactId>
-    <version>1.0.0</version>
-</dependency>
+```bash
+curl -s https://raw.githubusercontent.com/Open-Spring-Labs/spring-artisan/master/install.sh | bash
 ```
+
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/Open-Spring-Labs/spring-artisan/master/install.ps1 | iex
+```
+
+That's it. Restart your terminal and the `spring-artisan` command is available globally.
 
 ### From Source
 
@@ -29,14 +33,6 @@ A powerful code generator for Spring Boot projects, inspired by Laravel Artisan.
 git clone https://github.com/Open-Spring-Labs/spring-artisan.git
 cd spring-artisan
 mvn clean install
-```
-
-### Standalone CLI
-
-```bash
-# Build standalone JAR
-mvn clean package -DskipTests
-java -jar spring-artisan-cli/target/spring-artisan.jar make --help
 ```
 
 ## Usage
